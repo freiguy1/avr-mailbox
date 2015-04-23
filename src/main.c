@@ -49,7 +49,7 @@ ISR(PCINT0_vect) {
 
 int main( void ){
 
-    PORTA |= (PA0<<1) | (PA1<<1); // Enable pull up resistor for door
+    PORTA |= (1<<PA0) | (1<<PA1); // Enable pull up resistor for door
 
     GIMSK |= PCIE0; // Enable PCINT 7:0
     PCMSK0 |= (PCINT0 | PCINT1); // Select which pin interrupt is enabled
