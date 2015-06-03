@@ -3,7 +3,6 @@
 #include <util/delay.h>   //gives me _delay_ms() and 
                           // _delay_us()
 #include <avr/interrupt.h>
-#include <avr/delay.h>
 
 volatile uint8_t doorOpen = 0;
 volatile uint8_t flagUp = 0;
@@ -54,12 +53,12 @@ ISR(PCINT0_vect) {
 int main( void ){
 
     // DOOR SETUP
-    PORTA |= (1<<PA0) // Enable pull up resistor for door
+    PORTA |= (1<<PA0); // Enable pull up resistor for door
     GIMSK |= (1<<PCIE0); // Enable PCINT 7:0 for door
     PCMSK0 |= (1<<PCINT0); // Enable interrupt 0 for door
 
     // LASER SETUP
-    ACSR |= (1<<ACIE) // Enable analog comparator interrupt on toggle
+    ACSR |= (1<<ACIE); // Enable analog comparator interrupt on toggle
 
     //Testing things
     DDRA |= (PA3<<1) | (PA4<<1); // PA3 = Door; PA4 = Laser
