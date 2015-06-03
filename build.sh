@@ -1,7 +1,7 @@
 #!/bin/bash
 
 build() {
-    avr-gcc -mmcu=attiny44a -DF_CPU=1000000UL -O -o bin/main.bin src/main.c && \
+    avr-gcc -mmcu=attiny84 -DF_CPU=1000000UL -O -o bin/main.bin src/main.c && \
     avr-objcopy -O ihex bin/main.bin bin/main.hex
 }
 
@@ -12,11 +12,11 @@ case "$1" in
         build
         ;;
     burn)
-        build && avrdude -c usbtiny -p t44 -U flash:w:bin/main.hex
+        build && avrdude -c usbtiny -p t84 -U flash:w:bin/main.hex
         ;;
 
     fuses)
-        avrdude -c usbtiny -p t44 -U lfuse:w:0x62:m -U hfuse:w:0x5f:m
+        avrdude -c usbtiny -p t84 -U lfuse:w:0x62:m -U hfuse:w:0x5f:m
         ;;
     clean)
         rm -rf bin
