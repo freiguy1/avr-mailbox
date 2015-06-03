@@ -3,6 +3,7 @@
 #include <util/delay.h>   //gives me _delay_ms() and 
                           // _delay_us()
 #include <avr/interrupt.h>
+#include <avr/delay.h>
 
 volatile uint8_t doorOpen = 0;
 volatile uint8_t flagUp = 0;
@@ -11,53 +12,58 @@ volatile uint8_t beamDetected = 0;
 
 void handleDoorOpen() {
     doorOpen = 1;
-    PORTA |= (1<<PA2);
+    PORTA |= (1<<PA3);
 }
 
 void handleDoorClose() {
     doorOpen = 0;
-    PORTA &= ~(1<<PA2);
+    PORTA &= ~(1<<PA3);
 }
 
 void handleInfraredBeamBroken() {
     beamDetected = 0;
-    PORTA |= (1<<PA5);
+    PORTA |= (1<<PA4);
 }
 
 void handleInfraredBeamDetected() {
     beamDetected = 1;
-    PORTA &= ~(1<<PA5);
+    PORTA &= ~(1<<PA4);
+}
+
+ISR(ANA_COMP_vect) {
+    uint8_t analogComparatorOutput = ACSR & 0x20;
+    if(analogComparatorOutput) {
+        handleInfraredBeamDetected();
+    } else {
+        handleInfraredBeamBroken();
+    }
+    _delay_ms(10);
 }
 
 ISR(PCINT0_vect) {
     // If door was closed but we're reading door open
-    if(!doorOpen && (PINA & (1<<PCINT1))) {
+    if(!doorOpen && (PINA & (1<<PCINT0))) {
         handleDoorOpen();
     // If door was open but we're reading door closed
-    } else if(doorOpen && !(PINA & (1<<PCINT1))) {
+    } else if(doorOpen && !(PINA & (1<<PCINT0))) {
         handleDoorClose();
     }
-
-    // If beam detected and now it is not
-    if(beamDetected && (PINA & (1<<PCINT0))) {
-        handleInfraredBeamBroken();
-    // If beam not detected and now it is
-    } else if(!beamDetected && !(PINA & (1<<PCINT0))) {
-        handleInfraredBeamDetected();
-    }
+    _delay_ms(10);
 }
 
 int main( void ){
 
-    PORTA |= (1<<PA0) | (1<<PA1); // Enable pull up resistor for door and infrared
+    // DOOR SETUP
+    PORTA |= (1<<PA1) // Enable pull up resistor for door
+    GIMSK |= (1<<PCIE0); // Enable PCINT 7:0 for door
+    PCMSK0 |= (1<<PCINT0); // Enable interrupt 0 for door
 
-    GIMSK |= (1<<PCIE0); // Enable PCINT 7:0
-    PCMSK0 |= (1<<PCINT0) | (1<<PCINT1); // Select which pin interrupt is enabled
+    // LASER SETUP
+    ACSR |= (1<<ACIE) // Enable analog comparator interrupt on toggle
 
     //Testing things
-    DDRA |= (PA2<<1) | (PA5<<1);
-    PORTA |= (1<<PA5);
-    PORTA |= (1<<PA2);
+    DDRA |= (PA3<<1) | (PA4<<1); // PA3 = Door; PA4 = Laser
+    PORTA |= (1<<PA3) | (1<<PA4);
     //End Testing things
 
     sei();
@@ -65,5 +71,4 @@ int main( void ){
     while(1){ 
         asm("sleep");
     }
-
 }
