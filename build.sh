@@ -16,7 +16,7 @@ case "$1" in
         ;;
 
     fuses)
-        avrdude -c usbtiny -p t84 -U lfuse:w:0x62:m -U hfuse:w:0x5f:m
+        avrdude -c usbtiny -p t84 -U lfuse:w:0x62:m -U hfuse:w:0xDF:m
         ;;
     clean)
         rm -rf bin
