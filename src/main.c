@@ -33,7 +33,7 @@ void handleInfraredBeamDetected() {
 }
 
 inline void setServoDegrees(uint8_t degree) {
-    uint16_t result = (1000 * (uint16_t)degree) / 180 + 1000;
+    uint16_t result = (50 * (uint16_t)degree) / 9 + 1000;
     OCR1A = result;
 }
 
