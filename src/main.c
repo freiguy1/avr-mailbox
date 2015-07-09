@@ -4,8 +4,9 @@
                           // _delay_us()
 #include <avr/interrupt.h>
 
-#define FLAG_VALUE_UP 670
-#define FLAG_VALUE_DOWN 1350
+// Larger = clockwise-er
+#define FLAG_VALUE_UP 700
+#define FLAG_VALUE_DOWN 1380
 #define FLAG_STATUS_UP 1
 #define FLAG_STATUS_DOWN 0
 #define LIGHT_STATUS_OFF 0
@@ -46,7 +47,7 @@ void handleInfraredBeamBroken() {
     beamDetected = 0;
     PORTA |= (1<<PA4);
     flagTimer = 0;
-    if(flagStatus == FLAG_STATUS_DOWN) {
+    if(flagStatus == FLAG_STATUS_DOWN && lightStatus != LIGHT_STATUS_OFF) {
         OCR1A = FLAG_VALUE_UP;
         flagStatus = FLAG_STATUS_UP;
     }
@@ -90,6 +91,7 @@ ISR(TIM1_OVF_vect) {
         if (flagTimer >= 150) {
             OCR1A = FLAG_VALUE_DOWN;
             flagStatus = FLAG_STATUS_DOWN;
+            _delay_ms(500);
         }
     }
 
